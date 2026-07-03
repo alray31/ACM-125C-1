@@ -18,7 +18,7 @@ from homeassistant.core import HomeAssistant
 
 from .const import CONF_TRANSMITTER_ENTITY_ID
 
-PLATFORMS: list[Platform] = [Platform.BUTTON, Platform.SELECT, Platform.SWITCH]
+PLATFORMS: list[Platform] = [Platform.BUTTON, Platform.LIGHT]
 
 
 @dataclass

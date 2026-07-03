@@ -139,16 +139,60 @@ EFFECT_CODES: dict[str, str] = {
     "Color": "111110100100110001101101",
 }
 
-COLOR_CODES: dict[str, str] = {
-    "Purple": "111110100100110011100001",
-    "Blue": "111110100100110010000111",
-    "Cyan": "111110100100110010010001",
-    "Green": "111110100100110010011111",
-    "Yellow": "111110100100110010110011",
-    "Orange": "111110100100110010111101",
-    "Red": "111110100100110011000101",
-    "Pink": "111110100100110011010101",
-}
+# Effects exposed through the light entity's native effect_list (everything
+# in EFFECT_CODES except "Color" and "White", which are handled by the
+# light's color wheel / white-mode controls instead of the effect list).
+ANIMATION_EFFECTS: list[str] = [
+    "Gradual",
+    "Wave",
+    "Jumping",
+    "Fading",
+    "Wave + Jumping",
+]
+
+# --- Continuous color wheel encoding ---------------------------------------
+#
+# Reverse-engineered from two known-good captures of the physical remote's
+# touch color wheel:
+#
+#   color_index=0  (0 deg)   -> 1111110100100110010000001
+#   color_index=63 (~360 deg, last step before wrapping) -> 1111110100100110011111111
+#
+# Structure (25 bits total):
+#   - bits 9-25 (17 bits): constant prefix "11111101001001100"
+#   - bits 2-8  (7 bits):  64 + color_index, plain binary, MSB first
+#       (i.e. the top bit of the 7-bit field is always 1 - only the low 6
+#       bits actually vary, giving 64 distinct wheel positions)
+#   - bit 1 (LSB): constant "1" (end bit)
+#
+# The wheel only has 64 discrete positions around the full 360 degrees
+# (5.625 degrees/step), not 128 - both known samples have bit 7 (the MSB of
+# the 7-bit field) set, which only makes sense as a fixed marker bit rather
+# than coincidence at both ends of the range.
+COLOR_WHEEL_PREFIX = "11111101001001100"  # 17 bits, constant
+COLOR_WHEEL_BASE_VALUE = 64  # 7-bit field = 64 + color_index
+COLOR_WHEEL_STEPS = 64  # color_index range: 0..63
+
+
+def color_wheel_code(color_index: int) -> str:
+    """Build the 25-bit rc-switch code for a color wheel position.
+
+    ``color_index`` must be 0..63. See the module docstring above for how
+    this was derived, and light.py / the README for how a standard HSV hue
+    (0-360) maps onto ``color_index`` - that mapping is a best-guess
+    calibration based on the product photo and MUST be verified against
+    the real light.
+    """
+    if not 0 <= color_index < COLOR_WHEEL_STEPS:
+        raise ValueError(f"color_index must be 0-{COLOR_WHEEL_STEPS - 1}, got {color_index}")
+    raw_value = COLOR_WHEEL_BASE_VALUE + color_index
+    return COLOR_WHEEL_PREFIX + format(raw_value, "07b") + "1"
+
+
+def color_wheel_command(color_index: int) -> PoolLightCommand:
+    """Build the RF command for a given color wheel position."""
+    return PoolLightCommand(color_wheel_code(color_index))
+
 
 # --- Pre-built commands ---------------------------------------------------
 
@@ -164,6 +208,8 @@ EFFECT_COMMANDS: dict[str, PoolLightCommand] = {
     option: PoolLightCommand(code) for option, code in EFFECT_CODES.items()
 }
 
-COLOR_COMMANDS: dict[str, PoolLightCommand] = {
-    option: PoolLightCommand(code) for option, code in COLOR_CODES.items()
-}
+# Precompute all 64 wheel-position commands once at import time (cheap:
+# same cost as the other ~26 pre-built commands).
+COLOR_WHEEL_COMMANDS: list[PoolLightCommand] = [
+    color_wheel_command(i) for i in range(COLOR_WHEEL_STEPS)
+]
