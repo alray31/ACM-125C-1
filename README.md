@@ -1,10 +1,13 @@
 # ACM-125C-1
 
-Intégration Home Assistant (HACS, custom repository) pour l'éclairage RF 433.92 MHz de la piscine. Elle remplace la télécommande RF ACM-125C-1 en s'appuyant sur la nouvelle plateforme d'entité **`radio_frequency`** introduite dans **Home Assistant 2026.5** et **ESPHome (`ir_rf_proxy`)**.
+Intégration Home Assistant (HACS, custom repository) pour l'éclairage RF 433.92 MHz de l'écumoire de piscine. Elle remplace la logique qui était auparavant codée en dur dans le firmware ESPHome (button/switch/select avec tous les codes `rc_switch`) en s'appuyant sur la nouvelle plateforme d'entité **`radio_frequency`** introduite dans **Home Assistant 2026.5** et **ESPHome (`ir_rf_proxy`)**.
 
 ## Architecture
 
-- Cette intégration découvre l'émetteur RF compatible (433.92 MHz, OOK) exposé par ESPHome ou autre émmeteur RF compatible, et envoie les commandes RF via `radio_frequency.async_send_command`.
+- **Côté ESPHome** : le firmware ne fait plus qu'exposer un émetteur RF brut (`radio_frequency:` / `platform: ir_rf_proxy`) — voir `esphome-piscine-eclairage.yaml`. Il ne connaît plus aucun code de télécommande.
+- **Côté Home Assistant** : cette intégration ("consumer integration") découvre l'émetteur RF compatible (433.92 MHz, OOK) exposé par ESPHome, et envoie les commandes RF via `radio_frequency.async_send_command`.
+
+C'est exactement le modèle documenté par Home Assistant pour les intégrations comme *Honeywell String Lights* ou *Novy Cooker Hood*, sorties dans la même release.
 
 ## Installation
 
@@ -16,12 +19,20 @@ Intégration Home Assistant (HACS, custom repository) pour l'éclairage RF 433.9
 ## Entités créées
 
 - `button.pair` — envoie le code d'appairage.
-- `switch.on_off` — allume/éteint (état "assumed", restauré au redémarrage — la RF est unidirectionnelle, HA ne peut pas confirmer l'état réel de la lumière).
-- `select.light_intensity_or_effect_speed` — 1 à 8.
-- `select.effect` — Gradual / Wave / Jumping / Fading / Wave + Jumping / White / Color.
-- `select.color` — Purple / Blue / Cyan / Green / Yellow / Orange / Red / Pink.
+- `light.<device>` — une seule entité `light` regroupant tout le reste (voir ci-dessous). Remplace les anciennes `switch.on_off`, `select.color`, `select.effect` et `select.light_intensity_or_effect_speed`, qui n'existent plus.
 
-## Dépendances
+### Le light entity
 
-- `radio_frequency` (intégration cœur Home Assistant, disponible depuis 2026.5)
-- Paquet Python [`rf-protocols`](https://github.com/home-assistant-libs/rf-protocols) (déclaré dans `manifest.json`, installé automatiquement par HA)
+Home Assistant affiche nativement une roue de couleur pour les lights en mode couleur HS, donc plus besoin de select pour la couleur :
+
+- **Roue de couleur** : au clic, envoie le code "effect color", attend 0.3 s (`COLOR_COMMAND_DELAY_S` dans `const.py`), puis envoie le code RF correspondant à la position sur la roue (64 positions possibles, encodage continu — voir "Roue de couleur : l'encodage RF" plus bas).
+- **Mode blanc** : envoie simplement le code "effect white".
+- **Slider de luminosité** : envoie un des 8 codes "intensity or effect speed" (paliers de 12.5%). C'est le même bouton physique que la télécommande utilise soit pour l'intensité (en mode couleur/blanc) soit pour la vitesse d'effet (quand un effet d'animation est actif) — Home Assistant ne permet pas de renommer dynamiquement le libellé du slider natif du light card, donc ce double-sens n'est documenté que **ici**, pas dans l'interface.
+- **Liste d'effets** (menu natif "Effect" du light) : Gradual, Wave, Jumping, Fading, Wave + Jumping. ("Color" et "White" ne sont pas dans cette liste puisqu'ils sont gérés par la roue de couleur / le mode blanc directement.)
+
+## Roue de couleur : l'encodage RF
+
+Contrairement aux autres commandes (24 bits, table fixe), la roue de couleur physique encode une position continue sur 25 bits :
+
+```
+préfixe constant (17 bits) + valeur 7 bits (64 +
