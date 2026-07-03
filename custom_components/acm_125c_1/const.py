@@ -9,6 +9,25 @@ FREQUENCY_HZ = 433_920_000
 
 CONF_TRANSMITTER_ENTITY_ID = "transmitter_entity_id"
 
+# --- Device info shown in Settings > Devices for every entity ---
+MANUFACTURER = "alray31"
+MODEL = "ACM-125C-1 (virtual RF remote)"
+
+
+def build_device_info(entry) -> dict:
+    """Build the shared device_info dict used by every platform.
+
+    Defined once here so button.py / switch.py / select.py can't drift
+    out of sync with each other.
+    """
+    return {
+        "identifiers": {(DOMAIN, entry.entry_id)},
+        "name": entry.title,
+        "manufacturer": MANUFACTURER,
+        "model": MODEL,
+    }
+
+
 # --- rc-switch style protocol parameters, copied from the original ---
 # --- ESPHome YAML (remote_transmitter.transmit_rc_switch_raw).      ---
 PULSE_LENGTH_US = 260

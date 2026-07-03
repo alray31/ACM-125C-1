@@ -12,7 +12,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 
 from . import Acm125c1ConfigEntry
 from .codes import OFF_COMMAND, ON_COMMAND
-from .const import DOMAIN
+from .const import build_device_info
 
 SWITCH_DESCRIPTION = SwitchEntityDescription(
     key="on_off",
@@ -48,12 +48,7 @@ class Acm125c1OnOffSwitch(SwitchEntity, RestoreEntity):
         """Initialize the switch."""
         self._entry = entry
         self._attr_unique_id = f"{entry.entry_id}_on_off"
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, entry.entry_id)},
-            "name": entry.title,
-            "manufacturer": "ACM",
-            "model": "125C-1 (virtual RF remote)",
-        }
+        self._attr_device_info = build_device_info(entry)
         self._attr_is_on = False
 
     async def async_added_to_hass(self) -> None:

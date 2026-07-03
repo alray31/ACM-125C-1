@@ -10,7 +10,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import Acm125c1ConfigEntry
 from .codes import PAIR_COMMAND
-from .const import DOMAIN
+from .const import build_device_info
 
 PAIR_DESCRIPTION = ButtonEntityDescription(
     key="pair",
@@ -40,12 +40,7 @@ class Acm125c1PairButton(ButtonEntity):
         """Initialize the button."""
         self._entry = entry
         self._attr_unique_id = f"{entry.entry_id}_pair"
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, entry.entry_id)},
-            "name": entry.title,
-            "manufacturer": "ACM",
-            "model": "125C-1 (virtual RF remote)",
-        }
+        self._attr_device_info = build_device_info(entry)
 
     async def async_press(self) -> None:
         """Send the pairing code."""

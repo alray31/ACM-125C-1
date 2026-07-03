@@ -42,7 +42,7 @@ class Acm125c1ConfigFlow(ConfigFlow, domain=DOMAIN):
             await self.async_set_unique_id("pool_light_ecumoir")
             self._abort_if_unique_id_configured()
             return self.async_create_entry(
-                title="Éclairage écumoire (piscine)",
+                title="ACM-125C-1 Pool Lights Remote",
                 data={CONF_TRANSMITTER_ENTITY_ID: user_input[CONF_TRANSMITTER_ENTITY_ID]},
             )
 

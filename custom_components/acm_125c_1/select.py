@@ -10,7 +10,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 
 from . import Acm125c1ConfigEntry
 from .codes import COLOR_COMMANDS, EFFECT_COMMANDS, INTENSITY_COMMANDS
-from .const import DOMAIN
+from .const import build_device_info
 
 CHOOSE = "Choose"
 
@@ -74,12 +74,7 @@ class Acm125c1Select(SelectEntity, RestoreEntity):
         self._entry = entry
         self._commands = commands
         self._attr_unique_id = f"{entry.entry_id}_{key}"
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, entry.entry_id)},
-            "name": entry.title,
-            "manufacturer": "ACM",
-            "model": "125C-1 (virtual RF remote)",
-        }
+        self._attr_device_info = build_device_info(entry)
         self._attr_options = [CHOOSE, *commands.keys()]
         self._attr_current_option = CHOOSE
 
