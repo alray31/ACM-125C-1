@@ -1,7 +1,7 @@
 {
   "domain": "acm_125c_1",
   "name": "ACM-125C-1",
-  "version": "0.0.0c",
+  "version": "0.0.0",
   "documentation": "https://github.com/alray31/ACM-125C-1",
   "issue_tracker": "https://github.com/alray31/ACM-125C-1/issues",
   "codeowners": ["@alray31"],
