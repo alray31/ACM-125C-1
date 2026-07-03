@@ -1,0 +1,31 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "ACM-125C-1 - Pool light",
+        "description": "Pick the RF transmitter (e.g. your ESPHome device's radio_frequency entity) that should be used to send commands to the pool light.",
+        "data": {
+          "transmitter_entity_id": "RF transmitter"
+        }
+      }
+    },
+    "abort": {
+      "no_transmitters": "No radio_frequency transmitter entities were found. Set up an ESPHome device with the ir_rf_proxy radio_frequency platform first.",
+      "no_compatible_transmitters": "No RF transmitter compatible with 433.92 MHz OOK was found.",
+      "already_configured": "This device is already configured."
+    }
+  },
+  "entity": {
+    "button": {
+      "pair": { "name": "Pair" }
+    },
+    "switch": {
+      "on_off": { "name": "On/Off" }
+    },
+    "select": {
+      "intensity_effect_speed": { "name": "Light intensity or Effect Speed" },
+      "effect": { "name": "Effect" },
+      "color": { "name": "Color" }
+    }
+  }
+}

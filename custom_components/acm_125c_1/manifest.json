@@ -1,0 +1,13 @@
+{
+  "domain": "acm_125c_1",
+  "name": "ACM-125C-1",
+  "version": "1.0.0",
+  "documentation": "https://github.com/YOUR_GITHUB_USER/ACM-125C-1",
+  "issue_tracker": "https://github.com/YOUR_GITHUB_USER/ACM-125C-1/issues",
+  "codeowners": ["@YOUR_GITHUB_USER"],
+  "config_flow": true,
+  "dependencies": ["radio_frequency"],
+  "requirements": ["rf-protocols>=2.2.0"],
+  "iot_class": "assumed_state",
+  "integration_type": "device"
+}
