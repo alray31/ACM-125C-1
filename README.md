@@ -12,7 +12,7 @@ Control an **ACM-125**, **ACM-125C**, **ACM-197C** or **ACM-198C** RF (433.92 MH
 
 This integration doesn't touch any hardware itself. It's a *consumer* of Home Assistant's [`radio_frequency`](https://www.home-assistant.io/integrations/radio_frequency/) radio frequency platform: it sends RF commands through whatever `radio_frequency` proxy transmitter you already have set up (typically an ESPHome or Broadlink device), the same way built-in integrations like *Honeywell String Lights* or *Novy Cooker Hood* do.
 Refer to https://www.home-assistant.io/integrations/radio_frequency/
-This project is an upgrade from the initial project that was using a much more complicated ESPHome firmware and select entities instead of a light entity/color wheel. The logic behind the RF code is documented in the initial poject and wont be replained here since this project purpose is to simplify things. The inital project can be found in this repo: https://github.com/alray31/ESP-125C-1
+This project is an upgrade from the initial project that was using a much more complicated ESPHome firmware and less user-firnedly "select" entities approach instead of a single light entity/color wheel. The logic behind the RF codes is documented in the initial poject and wont be re-explained here since this project purpose is to simplify things. The inital project and details about the RF codes used can be found in this repo: https://github.com/alray31/ESP-125C-1
 
 <img width="512" height="170" alt="image" src="https://github.com/user-attachments/assets/64a0fb2f-cb7d-41b5-b0a6-a6cefaaf862b" />
 
@@ -25,7 +25,7 @@ This project is an upgrade from the initial project that was using a much more c
 - HACS.
 
 This integration does **not** include or manage the ESPHome firmware — it only talks to whichever `radio_frequency` transmitter entity you already have configured in Home Assistant.
-refer to Esphome Radio Frequency platform: https://esphome.io/components/ir_rf_proxy/#radio-frequency-platform for configuring an ESPHome radio frequency proxy.
+refer to Esphome Radio Frequency platform: https://esphome.io/components/ir_rf_proxy/#radio-frequency-platform for configuring an ESPHome radio frequency proxy. Minimal hardware setup explained at the end of this readme file.
 
 ## Installation
 
@@ -109,7 +109,7 @@ Paring should be done if your pool light is unresponsive to this integration.
 
 RF here is one-way and "fire and forget" — Home Assistant has no way to confirm the light actually did what was asked, so this integration reports whatever it last told the light to do (an *assumed state* entity). It's also why the color wheel snaps to 64 known positions rather than trying to interpolate an arbitrary number of shades: only sending codes that are confirmed to correspond to real wheel positions keeps the light's behavior predictable. The changes made using the physical remote won't reflect in Home Assisant. The physical remote might become "out of sync" with the light, for example, the physical remote remember the last time it's power button was pressed was to send to OFF RF code so next time it's pressed, it will send the ON RF code. SO if your light was turned ON using this integration, you might have to press the power button twice to turn the light OFF so to physical remote catch up by sending the ON command and then the OFF command. Same behavior is expected with other fonctions. This is a normal limitation of one-way RF communication and assumed state. The same "problem" would occur if you had 2 physical remotes.
 
-## Required Hardware:
+## Required Hardware (If you don't already have a RF Proxy):
 
 1) The easy option: Buy a Broadlink RF transmitter.
 2) The DIY option: An ESP32 or ESP8266 dev board with a WL102-341 RF433 Transmitter Module
