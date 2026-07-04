@@ -143,7 +143,7 @@ RF433 Transmitter:
 
 ---
 
-### Miniaml ESPHome firmware YAML for DIY Hardware (option 2):
+### Minimum ESPHome firmware YAML for DIY Hardware (option 2):
 
 Make sure to enture the correct values for your setup (password, wifi, gpio, etc)
 
