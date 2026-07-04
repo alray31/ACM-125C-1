@@ -4,6 +4,11 @@
 [![GitHub Release](https://img.shields.io/github/v/release/alray31/ACM-125C-1)](https://github.com/alray31/ACM-125C-1/releases)
 
 Control an **ACM-125**, **ACM-125C**, **ACM-197C** or **ACM-198C** RF (433.92 MHz) pool light directly from Home Assistant, with a real `light` entity — color wheel, brightness, white mode, and effects — instead of the physical **ACM-125C-1** RF Remote.
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/08fbf27b-4162-4071-aa30-50dccd7bf33f" /><img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/cfca8bd6-ac91-4dfe-a265-32c5b3e8c8f0" /><img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/39348a2c-4246-4778-b826-1f3e97546974" /><img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/44df0282-2905-4458-a594-6722ed725e21" />
+
+
+
+
 
 This integration doesn't touch any hardware itself. It's a *consumer* of Home Assistant's [`radio_frequency`](https://www.home-assistant.io/integrations/radio_frequency/) radio frequency platform: it sends RF commands through whatever `radio_frequency` proxy transmitter you already have set up (typically an ESPHome or Broadlink device), the same way built-in integrations like *Honeywell String Lights* or *Novy Cooker Hood* do.
 Refer to https://www.home-assistant.io/integrations/radio_frequency/
