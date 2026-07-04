@@ -97,7 +97,8 @@ The remote's animation modes (Gradual, Wave, Jumping, Fading, Wave + Jumping) sh
 
 ### Pairing
 
-The `button.<name>_pair` entity sends the same pairing code the original remote ould sends when in pairing mode (M+C button held for 15 sec), for linking the light to your RF proxy, if required.
+The `button.<name>_pair` entity sends the same pairing code the original remote would sends when in pairing mode (M+C button held for 15 sec), for linking the light to your RF proxy, if required.
+Paring should be done if your pool light is unresponsive to this integration.
 
 <img width="529" height="228" alt="image" src="https://github.com/user-attachments/assets/2ecd9bbb-ac48-47c5-b8ac-5ae235dd5b05" />
 
