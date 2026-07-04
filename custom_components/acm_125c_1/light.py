@@ -9,9 +9,9 @@ brightness slider, white-mode control, and effect list:
   against 8 real, verified colors from the original firmware (see
   codes.py's module docstring for the full story of how those were
   found and why a single global linear formula wasn't accurate enough).
-  A single RF code is sent - no separate "effect color" trigger or
-  delay needed, matching how the original firmware's color codes work
-  standalone.
+  It sends an explicit "effect color" trigger first (mimics pressing the
+  mode button on the physical remote), waits for that transmission to
+  clear the air, then sends the specific position code.
 - Picking "white" sends the single "effect white" RF code.
 - The brightness slider sends one of the 8 "intensity or effect speed"
   codes. The same physical remote buttons mean "light intensity" when the
@@ -26,6 +26,7 @@ brightness slider, white-mode control, and effect list:
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -56,7 +57,7 @@ from .codes import (
     hue_to_color_index,
     index_to_hue,
 )
-from .const import build_device_info
+from .const import COLOR_COMMAND_DELAY_S, build_device_info
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -182,6 +183,14 @@ class Acm125c1Light(LightEntity, RestoreEntity):
                 color_index,
                 actual_hue,
             )
+            # Explicitly switch to "color" mode first (mimics pressing the
+            # mode button on the physical remote before picking a shade),
+            # then wait for that transmission to fully clear the air
+            # before sending the specific position - re-testing this
+            # two-step sequence now that the color codes use the correct
+            # 24-bit format.
+            await self._send(EFFECT_COMMANDS["Color"])
+            await asyncio.sleep(COLOR_COMMAND_DELAY_S)
             await self._send(COLOR_WHEEL_COMMANDS[color_index])
             # Report the calibrated hue for this position, not the raw
             # picked hue, so the UI reflects what we actually sent.
