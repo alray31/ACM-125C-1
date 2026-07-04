@@ -1,9 +1,9 @@
 # ACM-125C-1 for Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-[![GitHub Release](https://img.shields.io/github/v/release/alray31/ACM-125C-1)](https://github.com/alray31/ACM-125C-1/releases)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat)](https://github.com/hacs/integration) [![HACS Validation](https://github.com/alray31/ACM-125C-1/actions/workflows/hacs.yml/badge.svg)](https://github.com/ACM-125C-1/actions/workflows/hacs.yml) [![Hassfest](https://github.com/alray31/ACM-125C-1/actions/workflows/hassfest.yml/badge.svg)](https://github.com/alray31/ACM-125C-1/actions/workflows/hassfest.yml) [![GitHub Release](https://img.shields.io/github/v/release/alray31/ACM-125C-1?style=flat&color=orange)](https://github.com/alray31/ACM-125C-1/releases) [![GitHub Release Date](https://img.shields.io/github/release-date/alray31/ACM-125C-1)](https://github.com/alray31/ACM-125C-1/releases) [![GitHub Stars](https://img.shields.io/github/stars/alray31/ACM-125C-1?style=flat)](https://github.com/alray31/ACM-125C-1/stargazers) [![GitHub Forks](https://img.shields.io/github/forks/alray31/ACM-125C-1?style=flat)](https://github.com/alray31/ACM-125C-1/network/members) [![GitHub Issues](https://img.shields.io/github/issues/alray31/ACM-125C-1)](https://github.com/alray31/ACM-125C-1/issues) [![Last Commit](https://img.shields.io/github/last-commit/alray31/ACM-125C-1)](https://github.com/alray31/ACM-125C-1/commits) [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.5%2B-41BDF5?logo=homeassistant)](https://www.home-assistant.io/) [![License](https://img.shields.io/github/license/alray31/ACM-125C-1)](LICENSE)
 
 Control an **ACM-125**, **ACM-125C**, **ACM-197C** or **ACM-198C** RF (433.92 MHz) pool light directly from Home Assistant, with a real `light` entity — color wheel, brightness, white mode, and effects — instead of the physical **ACM-125C-1** RF Remote.
+
 <img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/08fbf27b-4162-4071-aa30-50dccd7bf33f" /><img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/cfca8bd6-ac91-4dfe-a265-32c5b3e8c8f0" /><img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/39348a2c-4246-4778-b826-1f3e97546974" /><img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/44df0282-2905-4458-a594-6722ed725e21" />
 
 
@@ -12,6 +12,7 @@ Control an **ACM-125**, **ACM-125C**, **ACM-197C** or **ACM-198C** RF (433.92 MH
 
 This integration doesn't touch any hardware itself. It's a *consumer* of Home Assistant's [`radio_frequency`](https://www.home-assistant.io/integrations/radio_frequency/) radio frequency platform: it sends RF commands through whatever `radio_frequency` proxy transmitter you already have set up (typically an ESPHome or Broadlink device), the same way built-in integrations like *Honeywell String Lights* or *Novy Cooker Hood* do.
 Refer to https://www.home-assistant.io/integrations/radio_frequency/
+This project is an upgrade from the initial project that was using a much more complicated ESPHome firmware and select entities instead of a light entity/color wheel. The logic behind the RF code is documented in the initial poject and wont be replained here since this project purpose is to simplify things. The inital project can be found in this repo: https://github.com/alray31/ESP-125C-1
 
 <img width="512" height="170" alt="image" src="https://github.com/user-attachments/assets/64a0fb2f-cb7d-41b5-b0a6-a6cefaaf862b" />
 
@@ -106,3 +107,77 @@ Paring should be done if your pool light is unresponsive to this integration.
 ## Notes on reliability
 
 RF here is one-way and "fire and forget" — Home Assistant has no way to confirm the light actually did what was asked, so this integration reports whatever it last told the light to do (an *assumed state* entity). It's also why the color wheel snaps to 64 known positions rather than trying to interpolate an arbitrary number of shades: only sending codes that are confirmed to correspond to real wheel positions keeps the light's behavior predictable. The changes made using the physical remote won't reflect in Home Assisant. The physical remote might become "out of sync" with the light, for example, the physical remote remember the last time it's power button was pressed was to send to OFF RF code so next time it's pressed, it will send the ON RF code. SO if your light was turned ON using this integration, you might have to press the power button twice to turn the light OFF so to physical remote catch up by sending the ON command and then the OFF command. Same behavior is expected with other fonctions. This is a normal limitation of one-way RF communication and assumed state. The same "problem" would occur if you had 2 physical remotes.
+
+## Required Hardware:
+
+1) The easy option: Buy a Broadlink RF transmitter.
+2) The DIY option: An ESP32 or ESP8266 dev board with a WL102-341 RF433 Transmitter Module
+
+
+### DIY Hardware Part List (If you chose hardware option 2):
+
+Here's what you'll need to do your own DIY RF433 PROXY
+
+| Quantity | Component | Notes |
+|----------|-----------|-------|
+| 1        | ESP32 or ESP8266 Dev Board | Any ESP32 or ESP8266 board compatible with ESPHome |
+| 1        | Qiachip WL102-341 RF433 Transmitter Module | To transmit RF 433.92 MHz codes |
+| 1        | Jumper Wires | For connections between ESP32 and transmitter |
+| 1        | USB Cable | To power and flash the ESP32 |
+| Optional | 3D-printed enclosure | To house the electronics safely |
+
+ESP32 Dev board:  
+<img width="273" height="272" alt="image" src="https://github.com/user-attachments/assets/2b5acb89-069d-4b25-9b7b-e92e0d80850e" />
+
+RF433 Transmitter:  
+<img width="181" height="172" alt="image" src="https://github.com/user-attachments/assets/65407214-096f-4e60-aab9-93035d3a9f96" />
+
+---
+
+### Wiring Diagram
+
+<img width="584" height="547" alt="image" src="https://github.com/user-attachments/assets/619c494c-9e98-438e-abf1-fa1421785298" />
+
+**Note:** EN contact from RF transmitter is not used.
+
+---
+
+### Miniaml ESPHome firmware YAML for DIY Hardware (option 2):
+
+Make sure to enture the correct values for your setup (password, wifi, gpio, etc)
+
+```
+esphome:
+  name: "my-device"
+  friendly_name: "My Device"
+
+esp32:                  # Change to esp8266: if using an ESP8266
+  board: esp32dev       # Change to your specific board model (e.g., nodemcuv2)
+
+wifi:
+  ssid: "YOUR_WIFI_SSID"
+  password: "YOUR_WIFI_PASSWORD"
+
+  ap:
+    ssid: "My-Device-Fallback"
+
+captive_portal:
+
+logger:
+
+api:
+
+ota:
+  password: "YOUR_OTA_PASSWORD"
+
+radio_frequency:
+  - platform: ir_rf_proxy
+    name: 433MHz RF Transmitter
+    frequency: 433.92MHz
+    remote_transmitter_id: rf_tx
+
+remote_transmitter:
+  pin: GPIOXX
+  carrier_duty_percent: 50%
+  id: rf_tx
+```
