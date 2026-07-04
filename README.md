@@ -32,7 +32,8 @@ refer to Esphome Radio Frequency platform: https://esphome.io/components/ir_rf_p
 ### HACS (recommended)
 
 1. Make sure your ESPHome device (or other supported RF transmitter) already exposes a `radio_frequency` entity in Home Assistant.
-2. In HACS, add this repository as a custom repository (category: *Integration*), or install it directly if it's been added to the HACS default store.
+2. In HACS, add this repository as a custom repository (category: *Integration*) or use this button:
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=integration&repository=ACM-125C-1&owner=alray31)
 3. Restart Home Assistant.
 4. Go to **Settings → Devices & services → Add integration → ACM-125C-1**.
 5. Pick the `radio_frequency` transmitter entity to use. Only transmitters compatible with 433.92 MHz / OOK modulation are shown.
