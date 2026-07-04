@@ -35,7 +35,16 @@ Copy `custom_components/acm_125c_1` into your Home Assistant `config/custom_comp
 ## What you get
 
 - `light.<name>` — one light entity that covers everything: on/off, color, brightness, white mode, and effects.
+
+<img width="670" height="754" alt="image" src="https://github.com/user-attachments/assets/af205313-e27f-4197-9a14-02f51381ed28" />
+
+
+
+
 - `button.<name>_pair` — sends the remote's pairing code, for pairing the light to the RF proxy the same way you'd pair the original remote.
+
+<img width="513" height="223" alt="image" src="https://github.com/user-attachments/assets/91de6f3e-454e-4b17-83ec-bcc851d41c00" />
+
 
 There's no separate switch or select entities: everything the original remote's buttons and wheel could do is exposed through the single light entity, using Home Assistant's native light controls. THe only exception is the "Pair" button which is outside the light entity.
 
@@ -46,6 +55,9 @@ The goal is to make the *native* Home Assistant light controls behave the way th
 ### Color wheel → nearest of 64 real wheel positions
 
 The physical remote's color wheel isn't infinitely precise: it has exactly **64 discrete positions** around the full 360°. When you pick a color on Home Assistant's built-in color wheel, the integration converts your pick to the closest one of those 64 real wheel positions and sends that single RF code — you get the same resolution the original remote's wheel offers, no more, no less. The reported color in Home Assistant reflects the position that was actually sent, not your exact pick, so what you see matches what the light is actually doing.
+
+<img width="675" height="754" alt="image" src="https://github.com/user-attachments/assets/34138edb-3fa9-4d2c-9467-11866aaa01aa" />
+
 
 ### Brightness slider → intensity *or* effect speed, depending on mode
 
@@ -58,17 +70,29 @@ Home Assistant's light card always labels its brightness slider "Brightness" —
 
 The physical remote offer 8 selection of speed and brightness. You get exactly the same resolution from the home assistant brightness slider despite the slider being ajustable from 0 to 100%. The actual % selection will be converted to the closest availabe speed / brightness (8 plevel each at a 12.5% increment)
 
+<img width="663" height="761" alt="image" src="https://github.com/user-attachments/assets/a18bc17e-3d70-4e2e-bb50-eb919ffb7c1b" />
+
+
 ### White → its own button in the light entity, not a wheel position
 
 Home Assistant lights that support both **HS color** and **white** expose white as its own dedicated control (a "W" segment/button next to the color wheel), separate from the color wheel itself. That maps directly onto the original remote, which also has a distinct button (botton labaled "C" on the physical remote) separate from the color wheel — picking white sends the remote's dedicated white RF code, it's never treated as "a color." For this reason, White can't be saved in a quick color picker, the W button must be used for white.
+
+<img width="648" height="759" alt="image" src="https://github.com/user-attachments/assets/ea42bb1d-3185-4593-98a8-f9c9855d03a1" />
+
 
 ### Effects list → the animation modes
 
 The remote's animation modes (Gradual, Wave, Jumping, Fading, Wave + Jumping) show up in the light's native **Effect** list. Selecting one sends that mode's RF code and lets the brightness slider switch to controlling effect speed, as above. Just like the physical remote, the light brightness can't be controlled when the light plays an animation.
 
+<img width="679" height="756" alt="image" src="https://github.com/user-attachments/assets/9caf400c-31b7-4d7e-9333-df2bab65f1a6" />
+
+
 ### Pairing
 
 The `button.<name>_pair` entity sends the same pairing code the original remote ould sends when in pairing mode (M+C button held for 15 sec), for linking the light to your RF proxy, if required.
+
+<img width="529" height="228" alt="image" src="https://github.com/user-attachments/assets/2ecd9bbb-ac48-47c5-b8ac-5ae235dd5b05" />
+
 
 ## Notes on reliability
 
