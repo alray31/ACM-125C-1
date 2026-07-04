@@ -43,24 +43,12 @@ REPEAT_WAIT_US = 7510
 # code, so the receiver has time to register both RF transmissions as
 # separate commands rather than one garbled/overlapping burst.
 #
-# IMPORTANT: each command already repeats 10x internally and takes ~328ms
-# to fully transmit over the air (measured: sum of abs(get_raw_timings())
-# in microseconds). ESPHome's remote_transmitter defaults to
-# non_blocking: true, so our `await` on sending a command likely returns
-# as soon as the ESP acknowledges the request, NOT once the physical
-# burst has actually finished - meaning this delay must be LONGER than
-# that ~328ms burst duration (with margin), or the second command's RF
-# can start before the first one's 10 repeats have actually finished
-# going out over the air. 0.3s was too short (shorter than the burst
-# itself); bumped to 1.0s.
-COLOR_COMMAND_DELAY_S = 1.0
-
-# --- Color wheel calibration --------------------------------------------
-#
-# Calibrated from the physical wheel photo/description: clockwise, dark
-# blue at 0 deg (color_index 0), cyan-green at 90 deg (index 16), yellow
-# at 180 deg (index 32), red-pink at 270 deg (index 48). That's a clean
-# linear relationship: hue = (240 - physical_angle) mod 360, i.e.
-# increasing color_index moves opposite to increasing standard HSV hue.
-COLOR_WHEEL_HUE_AT_INDEX_0 = 240.0  # degrees (dark blue, at color_index 0)
-COLOR_WHEEL_DIRECTION = -1  # -1 = increasing index -> decreasing hue (clockwise on the physical wheel)
+# Each command already repeats 10x internally and takes ~328ms to fully
+# transmit over the air (measured: sum of abs(get_raw_timings()) in
+# microseconds). ESPHome's remote_transmitter defaults to non_blocking:
+# true, so our `await` on sending a command likely returns as soon as the
+# ESP acknowledges the request, NOT once the physical burst has actually
+# finished - so this delay must stay a bit longer than that ~328ms burst
+# duration. Confirmed working at 1.0s; 0.5s leaves ~170ms of margin and
+# is confirmed working too.
+COLOR_COMMAND_DELAY_S = 0.5
