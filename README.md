@@ -1,35 +1,75 @@
-# ACM-125C-1
+# ACM-125C-1 for Home Assistant
 
-Intégration Home Assistant (HACS, custom repository) pour l'éclairage RF 433.92 MHz de l'écumoire de piscine. Elle remplace la logique qui était auparavant codée en dur dans le firmware ESPHome (button/switch/select avec tous les codes `rc_switch`) en s'appuyant sur la nouvelle plateforme d'entité **`radio_frequency`** introduite dans **Home Assistant 2026.5** et **ESPHome (`ir_rf_proxy`)**.
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+[![GitHub Release](https://img.shields.io/github/v/release/alray31/ACM-125C-1)](https://github.com/alray31/ACM-125C-1/releases)
 
-## Architecture
+Control an **ACM-125**, **ACM-125C**, **ACM-197C** or **ACM-198C** RF (433.92 MHz) pool light directly from Home Assistant, with a real `light` entity — color wheel, brightness, white mode, and effects — instead of the physical **ACM-125C-1** RF Remote.
 
-- **Côté ESPHome** : le firmware ne fait plus qu'exposer un émetteur RF brut (`radio_frequency:` / `platform: ir_rf_proxy`) — voir `esphome-piscine-eclairage.yaml`. Il ne connaît plus aucun code de télécommande.
-- **Côté Home Assistant** : cette intégration ("consumer integration") découvre l'émetteur RF compatible (433.92 MHz, OOK) exposé par ESPHome, et envoie les commandes RF via `radio_frequency.async_send_command`.
+This integration doesn't touch any hardware itself. It's a *consumer* of Home Assistant's [`radio_frequency`](https://www.home-assistant.io/integrations/radio_frequency/) radio frequency platform: it sends RF commands through whatever `radio_frequency` proxy transmitter you already have set up (typically an ESPHome or Broadlink device), the same way built-in integrations like *Honeywell String Lights* or *Novy Cooker Hood* do.
+Refer to https://www.home-assistant.io/integrations/radio_frequency/
 
-C'est exactement le modèle documenté par Home Assistant pour les intégrations comme *Honeywell String Lights* ou *Novy Cooker Hood*, sorties dans la même release.
+
+## Requirements
+
+- Home Assistant **2026.5** or newer (introduced the `radio_frequency` platform).
+- An RF transmitter exposing a `radio_frequency` entity — in practice, an ESPHome device running the [`ir_rf_proxy`](https://esphome.io/components/ir_rf_proxy/) component's `radio_frequency` platform, pointed at a 433.92 MHz transmitter. See ESPHome's [Radio Frequency Component](https://esphome.io/components/radio_frequency/) docs for the underlying entity type.
+- HACS.
+
+This integration does **not** include or manage the ESPHome firmware — it only talks to whichever `radio_frequency` transmitter entity you already have configured in Home Assistant.
+refer to Esphome Radio Frequency platform: https://esphome.io/components/ir_rf_proxy/#radio-frequency-platform for configuring an ESPHome radio frequency proxy.
 
 ## Installation
 
-1. Copier le dossier `custom_components/acm_125c_1` dans la config Home Assistant (ou publier ce dépôt sur GitHub et l'ajouter comme *custom repository* HACS de type "Integration").
-2. Installer via HACS puis redémarrer Home Assistant.
-3. Flasher l'ESP avec `esphome-piscine-eclairage.yaml` (adapter le nom du device, wifi, etc. — ce fichier ne contient que le bloc RF).
-4. **Paramètres → Appareils et services → Ajouter une intégration → ACM-125C-1**. Choisir l'entité `radio_frequency` de l'ESP dans la liste (elle n'apparaît que si l'ESPHome est déjà intégré et expose bien l'entité 433.92 MHz OOK).
+### HACS (recommended)
 
-## Entités créées
+1. Make sure your ESPHome device (or other supported RF transmitter) already exposes a `radio_frequency` entity in Home Assistant.
+2. In HACS, add this repository as a custom repository (category: *Integration*), or install it directly if it's been added to the HACS default store.
+3. Restart Home Assistant.
+4. Go to **Settings → Devices & services → Add integration → ACM-125C-1**.
+5. Pick the `radio_frequency` transmitter entity to use. Only transmitters compatible with 433.92 MHz / OOK modulation are shown.
 
-- `button.pair` — envoie le code d'appairage.
-- `light.<device>` — une seule entité `light` regroupant tout le reste (voir ci-dessous). Remplace les anciennes `switch.on_off`, `select.color`, `select.effect` et `select.light_intensity_or_effect_speed`, qui n'existent plus.
+### Manual
 
-### Le light entity
+Copy `custom_components/acm_125c_1` into your Home Assistant `config/custom_components` directory and restart.
 
-Home Assistant affiche nativement une roue de couleur pour les lights en mode couleur HS, donc plus besoin de select pour la couleur :
+## What you get
 
-- **Roue de couleur** : la teinte choisie est convertie en une des 64 positions de la roue physique via une interpolation calibrée sur 8 couleurs **vérifiées** (voir "Comment la roue de couleur fonctionne" plus bas), et un seul code RF est envoyé — sans étape intermédiaire ni délai.
-- **Mode blanc** : envoie simplement le code "effect white".
-- **Slider de luminosité** : envoie un des 8 codes "intensity or effect speed" (paliers de 12.5%). C'est le même bouton physique que la télécommande utilise soit pour l'intensité (en mode couleur/blanc) soit pour la vitesse d'effet (quand un effet d'animation est actif) — Home Assistant ne permet pas de renommer dynamiquement le libellé du slider natif du light card, donc ce double-sens n'est documenté que **ici**, pas dans l'interface.
-- **Liste d'effets** (menu natif "Effect" du light) : Gradual, Wave, Jumping, Fading, Wave + Jumping. ("Color" et "White" ne sont pas dans cette liste puisqu'ils sont gérés par la roue de couleur / le mode blanc directement.)
+- `light.<name>` — one light entity that covers everything: on/off, color, brightness, white mode, and effects.
+- `button.<name>_pair` — sends the remote's pairing code, for pairing the light to the RF proxy the same way you'd pair the original remote.
 
-## Comment la roue de couleur fonctionne
+There's no separate switch or select entities: everything the original remote's buttons and wheel could do is exposed through the single light entity, using Home Assistant's native light controls. THe only exception is the "Pair" button which is outside the light entity.
 
-La roue tactile physique a 64 positions (`color_index` 0-63). On a d'abord essayé de déduire l'encodage de 2 captures brutes (position 0 et position 63) avec une 
+## How it mirrors the original remote
+
+The goal is to make the *native* Home Assistant light controls behave the way the original ACM-125C-1 remote's buttons and wheel do — not to bolt on a set of custom controls that happen to send the right RF codes.
+
+### Color wheel → nearest of 64 real wheel positions
+
+The physical remote's color wheel isn't infinitely precise: it has exactly **64 discrete positions** around the full 360°. When you pick a color on Home Assistant's built-in color wheel, the integration converts your pick to the closest one of those 64 real wheel positions and sends that single RF code — you get the same resolution the original remote's wheel offers, no more, no less. The reported color in Home Assistant reflects the position that was actually sent, not your exact pick, so what you see matches what the light is actually doing.
+
+### Brightness slider → intensity *or* effect speed, depending on mode
+
+The physical remote has one set of `+`/`-` buttons that mean two different things depending on what the light is currently doing:
+
+- While the light is in **color** or **white** mode, they adjust **light intensity**.
+- While an **animation effect** is running (see below), they adjust the **effect's speed**.
+
+Home Assistant's light card always labels its brightness slider "Brightness" — that label can't be changed per-entity — but the slider sends the exact same underlying RF command either way, so it transparently does the right thing: turn the slider while looking at a solid color and it's intensity; turn it while an effect is animating and it's speed.
+
+The physical remote offer 8 selection of speed and brightness. You get exactly the same resolution from the home assistant brightness slider despite the slider being ajustable from 0 to 100%. The actual % selection will be converted to the closest availabe speed / brightness (8 plevel each at a 12.5% increment)
+
+### White → its own button in the light entity, not a wheel position
+
+Home Assistant lights that support both **HS color** and **white** expose white as its own dedicated control (a "W" segment/button next to the color wheel), separate from the color wheel itself. That maps directly onto the original remote, which also has a distinct button (botton labaled "C" on the physical remote) separate from the color wheel — picking white sends the remote's dedicated white RF code, it's never treated as "a color." For this reason, White can't be saved in a quick color picker, the W button must be used for white.
+
+### Effects list → the animation modes
+
+The remote's animation modes (Gradual, Wave, Jumping, Fading, Wave + Jumping) show up in the light's native **Effect** list. Selecting one sends that mode's RF code and lets the brightness slider switch to controlling effect speed, as above. Just like the physical remote, the light brightness can't be controlled when the light plays an animation.
+
+### Pairing
+
+The `button.<name>_pair` entity sends the same pairing code the original remote ould sends when in pairing mode (M+C button held for 15 sec), for linking the light to your RF proxy, if required.
+
+## Notes on reliability
+
+RF here is one-way and "fire and forget" — Home Assistant has no way to confirm the light actually did what was asked, so this integration reports whatever it last told the light to do (an *assumed state* entity). It's also why the color wheel snaps to 64 known positions rather than trying to interpolate an arbitrary number of shades: only sending codes that are confirmed to correspond to real wheel positions keeps the light's behavior predictable. The changes made using the physical remote won't reflect in Home Assisant. The physical remote might become "out of sync" with the light, for example, the physical remote remember the last time it's power button was pressed was to send to OFF RF code so next time it's pressed, it will send the ON RF code. SO if your light was turned ON using this integration, you might have to press the power button twice to turn the light OFF so to physical remote catch up by sending the ON command and then the OFF command. Same behavior is expected with other fonctions. This is a normal limitation of one-way RF communication and assumed state. The same "problem" would occur if you had 2 physical remotes.
