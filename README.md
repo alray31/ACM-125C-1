@@ -25,14 +25,11 @@ C'est exactement le modèle documenté par Home Assistant pour les intégrations
 
 Home Assistant affiche nativement une roue de couleur pour les lights en mode couleur HS, donc plus besoin de select pour la couleur :
 
-- **Roue de couleur** : au clic, envoie le code "effect color", attend 0.3 s (`COLOR_COMMAND_DELAY_S` dans `const.py`), puis envoie le code RF correspondant à la position sur la roue (64 positions possibles, encodage continu — voir "Roue de couleur : l'encodage RF" plus bas).
+- **Roue de couleur** : la teinte choisie est convertie en une des 64 positions de la roue physique via une interpolation calibrée sur 8 couleurs **vérifiées** (voir "Comment la roue de couleur fonctionne" plus bas), et un seul code RF est envoyé — sans étape intermédiaire ni délai.
 - **Mode blanc** : envoie simplement le code "effect white".
 - **Slider de luminosité** : envoie un des 8 codes "intensity or effect speed" (paliers de 12.5%). C'est le même bouton physique que la télécommande utilise soit pour l'intensité (en mode couleur/blanc) soit pour la vitesse d'effet (quand un effet d'animation est actif) — Home Assistant ne permet pas de renommer dynamiquement le libellé du slider natif du light card, donc ce double-sens n'est documenté que **ici**, pas dans l'interface.
 - **Liste d'effets** (menu natif "Effect" du light) : Gradual, Wave, Jumping, Fading, Wave + Jumping. ("Color" et "White" ne sont pas dans cette liste puisqu'ils sont gérés par la roue de couleur / le mode blanc directement.)
 
-## Roue de couleur : l'encodage RF
+## Comment la roue de couleur fonctionne
 
-Contrairement aux autres commandes (24 bits, table fixe), la roue de couleur physique encode une position continue sur 25 bits :
-
-```
-préfixe constant (17 bits) + valeur 7 bits (64 +
+La roue tactile physique a 64 positions (`color_index` 0-63). On a d'abord essayé de déduire l'encodage de 2 captures brutes (position 0 et position 63) avec une 
