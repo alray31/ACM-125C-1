@@ -21,6 +21,7 @@ brightness slider, white-mode control, and effect list:
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Any
 
 from homeassistant.components import radio_frequency
@@ -50,6 +51,8 @@ from .codes import (
     ON_COMMAND,
 )
 from .const import COLOR_COMMAND_DELAY_S, COLOR_WHEEL_DIRECTION, COLOR_WHEEL_HUE_AT_INDEX_0, build_device_info
+
+_LOGGER = logging.getLogger(__name__)
 
 BRIGHTNESS_LEVELS = 8
 
@@ -145,12 +148,28 @@ class Acm125c1Light(LightEntity, RestoreEntity):
             self._attr_effect = effect
 
     async def _send(self, command) -> None:
-        """Send one RF command through the configured transmitter."""
-        await radio_frequency.async_send_command(
-            self.hass,
-            self._entry.runtime_data.transmitter_entity_id,
-            command,
-        )
+        """Send one RF command through the configured transmitter.
+
+        This integration is "assumed state" (RF is one-way, fire-and-
+        forget): we report whatever we *told* the light to do, not
+        something we can confirm. So if the actual RF transmission call
+        raises, we log it clearly (visible in Settings > System > Logs)
+        instead of letting the exception abort the rest of async_turn_on/
+        async_turn_off - otherwise a single failed send silently prevents
+        `is_on` from ever being updated, which looks exactly like "the
+        button does nothing".
+        """
+        try:
+            await radio_frequency.async_send_command(
+                self.hass,
+                self._entry.runtime_data.transmitter_entity_id,
+                command,
+            )
+        except Exception:
+            _LOGGER.exception(
+                "Failed to send RF command via transmitter %s",
+                self._entry.runtime_data.transmitter_entity_id,
+            )
 
     async def _ensure_on(self) -> None:
         """Send the base ON code if the light isn't already on."""
@@ -160,13 +179,20 @@ class Acm125c1Light(LightEntity, RestoreEntity):
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on the light, applying whichever attributes were given."""
+        _LOGGER.debug("async_turn_on called with kwargs=%s (was is_on=%s)", kwargs, self._attr_is_on)
         await self._ensure_on()
 
         if ATTR_HS_COLOR in kwargs:
             hue, saturation = kwargs[ATTR_HS_COLOR]
+            color_index = hue_to_color_index(hue)
+            _LOGGER.debug(
+                "Color wheel: received hue=%.1f saturation=%.1f -> color_index=%d",
+                hue,
+                saturation,
+                color_index,
+            )
             await self._send(EFFECT_COMMANDS["Color"])
             await asyncio.sleep(COLOR_COMMAND_DELAY_S)
-            color_index = hue_to_color_index(hue)
             await self._send(COLOR_WHEEL_COMMANDS[color_index])
             self._attr_hs_color = (hue, saturation)
             self._attr_color_mode = ColorMode.HS
@@ -188,4 +214,16 @@ class Acm125c1Light(LightEntity, RestoreEntity):
 
         if brightness is not None:
             level = brightness_to_level(brightness)
-          
+            _LOGGER.debug("Brightness: received %s -> intensity level %s", brightness, level)
+            await self._send(INTENSITY_COMMANDS[level])
+            self._attr_brightness = level_to_brightness(level)
+
+        self.async_write_ha_state()
+        _LOGGER.debug("async_turn_on done, is_on=%s state written", self._attr_is_on)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn off the light."""
+        _LOGGER.debug("async_turn_off called with kwargs=%s", kwargs)
+        await self._send(OFF_COMMAND)
+        self._attr_is_on = False
+        self.async_write_ha_state()
