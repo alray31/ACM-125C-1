@@ -13,7 +13,8 @@ Control an **ACM-125**, **ACM-125C**, **ACM-197C** or **ACM-198C** RF (433.92 MH
 This integration doesn't touch any hardware itself. It's a *consumer* of Home Assistant's [`radio_frequency`](https://www.home-assistant.io/integrations/radio_frequency/) radio frequency platform: it sends RF commands through whatever `radio_frequency` proxy transmitter you already have set up (typically an ESPHome or Broadlink device), the same way built-in integrations like *Honeywell String Lights* or *Novy Cooker Hood* do.
 Refer to https://www.home-assistant.io/integrations/radio_frequency/
 
-<img width="512" height="170" alt="image" src="https://github.com/user-attachments/assets/6c8e3f64-f9cc-4b19-a821-476347ac09ac" />
+<img width="512" height="170" alt="image" src="https://github.com/user-attachments/assets/64a0fb2f-cb7d-41b5-b0a6-a6cefaaf862b" />
+
 
 
 ## Requirements
