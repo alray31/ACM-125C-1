@@ -1,7 +1,7 @@
 {
   "domain": "acm_125c_1",
   "name": "ACM-125C-1",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "documentation": "https://github.com/YOUR_GITHUB_USER/ACM-125C-1",
   "issue_tracker": "https://github.com/YOUR_GITHUB_USER/ACM-125C-1/issues",
   "codeowners": ["@YOUR_GITHUB_USER"],
