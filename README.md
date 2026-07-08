@@ -2,14 +2,16 @@
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat)](https://github.com/hacs/integration) [![HACS Validation](https://github.com/alray31/ACM-125C-1/actions/workflows/hacs.yml/badge.svg)](https://github.com/ACM-125C-1/actions/workflows/hacs.yml) [![Hassfest](https://github.com/alray31/ACM-125C-1/actions/workflows/hassfest.yml/badge.svg)](https://github.com/alray31/ACM-125C-1/actions/workflows/hassfest.yml) [![GitHub Release](https://img.shields.io/github/v/release/alray31/ACM-125C-1?style=flat&color=orange)](https://github.com/alray31/ACM-125C-1/releases) [![GitHub Release Date](https://img.shields.io/github/release-date/alray31/ACM-125C-1)](https://github.com/alray31/ACM-125C-1/releases) [![GitHub Stars](https://img.shields.io/github/stars/alray31/ACM-125C-1?style=flat)](https://github.com/alray31/ACM-125C-1/stargazers) [![GitHub Forks](https://img.shields.io/github/forks/alray31/ACM-125C-1?style=flat)](https://github.com/alray31/ACM-125C-1/network/members) [![GitHub Issues](https://img.shields.io/github/issues/alray31/ACM-125C-1)](https://github.com/alray31/ACM-125C-1/issues) [![Last Commit](https://img.shields.io/github/last-commit/alray31/ACM-125C-1)](https://github.com/alray31/ACM-125C-1/commits) [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.5%2B-41BDF5?logo=homeassistant)](https://www.home-assistant.io/) [![License](https://img.shields.io/github/license/alray31/ACM-125C-1)](LICENSE)
 
-Control an **ACM-125**, **ACM-125C**, **ACM-197C** or **ACM-198C** RF (433.92 MHz) pool light directly from Home Assistant, with a real `light` entity — color wheel, brightness, white mode, and effects — instead of the physical **ACM-125C-1** RF Remote.
+Control an **ACM-125**, **ACM-125C**, **ACM-197C** or **ACM-198C** RF (433.92 MHz) above ground pool light(s) directly from Home Assistant, with a real `light` entity — color wheel, brightness, white mode, and effects — instead of the physical **ACM-125C-1** RF Remote.
+
+These lights and their remote are manufactured by Champlain Plastics Inc. (CPI), and are often sold under the Olympic brand, Jacuzzi brand as well as through pool supply retailers such as Olympic Pool Accessories, The Pool Factory, Pool Supplies Canada, McBurney Pools, Trévi and Club Piscine.
 
 <img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/08fbf27b-4162-4071-aa30-50dccd7bf33f" /><img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/cfca8bd6-ac91-4dfe-a265-32c5b3e8c8f0" /><img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/39348a2c-4246-4778-b826-1f3e97546974" /><img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/44df0282-2905-4458-a594-6722ed725e21" />
 
+## Note for the owners of **⚠️Carvin⚠️** inground pool lights:
+**The RF remote of the Carvin inground pool lights is identical in appearance but uses a different RF protocol and this integration won't work with Carvin lights.**
 
-
-
-
+## Description:
 This integration doesn't touch any hardware itself. It's a *consumer* of Home Assistant's [`radio_frequency`](https://www.home-assistant.io/integrations/radio_frequency/) radio frequency platform: it sends RF commands through whatever `radio_frequency` proxy transmitter you already have set up (typically an ESPHome or Broadlink device), the same way built-in integrations like *Honeywell String Lights* or *Novy Cooker Hood* do.
 Refer to https://www.home-assistant.io/integrations/radio_frequency/
 This project is an upgrade from the initial project that was using a much more complicated ESPHome firmware and less user-firnedly "select" entities approach instead of a single light entity/color wheel. The logic behind the RF codes is documented in the initial poject and wont be re-explained here since this project purpose is to simplify things. The inital project and details about the RF codes used can be found in this repo: https://github.com/alray31/ESP-125C-1
@@ -78,7 +80,7 @@ The physical remote has one set of `+`/`-` buttons that mean two different thing
 
 Home Assistant's light card always labels its brightness slider "Brightness" — that label can't be changed per-entity — but the slider sends the exact same underlying RF command either way, so it transparently does the right thing: turn the slider while looking at a solid color and it's intensity; turn it while an effect is animating and it's speed.
 
-The physical remote offer 8 selection of speed and brightness. You get exactly the same resolution from the home assistant brightness slider despite the slider being ajustable from 0 to 100%. The actual % selection will be converted to the closest availabe speed / brightness (8 plevel each at a 12.5% increment)
+The physical remote offer 8 selection of speed and brightness. You get exactly the same resolution from the home assistant brightness slider despite the slider being ajustable from 0 to 100%. The actual % selection will be converted to the closest availabe speed / brightness (8 level each at a 12.5% increment)
 
 <img width="663" height="761" alt="image" src="https://github.com/user-attachments/assets/a18bc17e-3d70-4e2e-bb50-eb919ffb7c1b" />
 
@@ -105,8 +107,16 @@ Paring should be done if your pool light is unresponsive to this integration.
 <img width="529" height="228" alt="image" src="https://github.com/user-attachments/assets/2ecd9bbb-ac48-47c5-b8ac-5ae235dd5b05" />
 
 
-## Notes on reliability
+## A note on pairing and your original remote
+This integration replays the exact RF codes captured from the author's own ACM-125C-1 remote, including that remote's unique address, which is baked into every command this integration sends. As a result, completing the pairing procedure with this integration causes the pool light's receiver to treat it as a new remote — and, as far as I know, your original physical remote effectively becomes unpaired in the process. Only one of the two, your physical remote or this integration, can control the light at any given time; switching back and forth requires repeating the pairing procedure for whichever one you want to use.
 
+**Planned:** a future release aims to let advanced users supply their own remote's unique address during setup, instead of the address baked into this integration. This is intended for users capable of extracting it themselves (for example, using an RTL-SDR dongle and Universal Radio Hacker). With a matching address, the integration and your original physical remote would be seen as the same remote by the receiver, allowing both to control the light at the same time without needing to re-pair between them.
+
+## Controlling multiple lights at once:
+Since the pool light's receiver only listens for its paired remote's address rather than any per-fixture addressing, a single command from this integration reaches every receiver within range that has learned that address. This means multiple pool lights (for example, a skimmer light and a return jet light) can all be controlled together simply by pairing each of them individually with this integration, exactly as you would pair each one to a physical remote. Once paired, they'll all mirror the same state and plays light animations in sync — there's no way for a single integration instance to control paired lights independently of one another, since the RF protocol has no concept of addressing individual fixtures separately from the remote itself.
+
+
+## Notes on reliability
 RF here is one-way and "fire and forget" — Home Assistant has no way to confirm the light actually did what was asked, so this integration reports whatever it last told the light to do (an *assumed state* entity). It's also why the color wheel snaps to 64 known positions rather than trying to interpolate an arbitrary number of shades: only sending codes that are confirmed to correspond to real wheel positions keeps the light's behavior predictable. The changes made using the physical remote won't reflect in Home Assisant. The physical remote might become "out of sync" with the light, for example, the physical remote remember the last time it's power button was pressed was to send to OFF RF code so next time it's pressed, it will send the ON RF code. SO if your light was turned ON using this integration, you might have to press the power button twice to turn the light OFF so to physical remote catch up by sending the ON command and then the OFF command. Same behavior is expected with other fonctions. This is a normal limitation of one-way RF communication and assumed state. The same "problem" would occur if you had 2 physical remotes.
 
 ## Required Hardware (If you don't already have a RF Proxy):
