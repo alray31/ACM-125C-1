@@ -58,11 +58,12 @@ Copy `custom_components/acm_125c_1` into your Home Assistant `config/custom_comp
 <img width="513" height="223" alt="image" src="https://github.com/user-attachments/assets/91de6f3e-454e-4b17-83ec-bcc851d41c00" />
 
 
-There's no separate switch or select entities: everything the original remote's buttons and wheel could do is exposed through the single light entity, using Home Assistant's native light controls. THe only exception is the "Pair" button which is outside the light entity.
+There's no separate switch or select entities: everything the original remote's buttons and wheel could do is exposed through the single light entity, using Home Assistant's native light controls. The only exception is the "Pair" button which is outside the light entity.
 
 ## How it mirrors the original remote
 
 The goal is to make the *native* Home Assistant light controls behave the way the original ACM-125C-1 remote's buttons and wheel do — not to bolt on a set of custom controls that happen to send the right RF codes.
+[Original remote instruction manual](INS-REMOTE.PDF)
 
 ### Color wheel → nearest of 64 real wheel positions
 
