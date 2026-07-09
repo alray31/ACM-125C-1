@@ -63,7 +63,8 @@ There's no separate switch or select entities: everything the original remote's 
 ## How it mirrors the original remote
 
 The goal is to make the *native* Home Assistant light controls behave the way the original ACM-125C-1 remote's buttons and wheel do — not to bolt on a set of custom controls that happen to send the right RF codes.
-[Original remote instruction manual](INS-REMOTE.PDF)
+
+[Original remote instruction manual](REMOTE.pdf)
 
 ### Color wheel → nearest of 64 real wheel positions
 
