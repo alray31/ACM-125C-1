@@ -48,14 +48,21 @@ Copy `custom_components/acm_125c_1` into your Home Assistant `config/custom_comp
 
 - `light.<name>` — one light entity that covers everything: on/off, color, brightness, white mode, and effects.
 
-<img width="670" height="754" alt="image" src="https://github.com/user-attachments/assets/af205313-e27f-4197-9a14-02f51381ed28" />
+<details>
+  <summary>Show image</summary>
+  <img width="670" height="754" alt="image" src="https://github.com/user-attachments/assets/af205313-e27f-4197-9a14-02f51381ed28" />
+</details>
+
 
 
 
 
 - `button.<name>_pair` — sends the remote's pairing code, for pairing the light to the RF proxy the same way you'd pair the original remote.
 
-<img width="513" height="223" alt="image" src="https://github.com/user-attachments/assets/91de6f3e-454e-4b17-83ec-bcc851d41c00" />
+<details>
+  <summary>Show image</summary>
+  <img width="513" height="223" alt="image" src="https://github.com/user-attachments/assets/91de6f3e-454e-4b17-83ec-bcc851d41c00" />
+</details>
 
 
 There's no separate switch or select entities: everything the original remote's buttons and wheel could do is exposed through the single light entity, using Home Assistant's native light controls. The only exception is the "Pair" button which is outside the light entity.
@@ -70,8 +77,10 @@ The goal is to make the *native* Home Assistant light controls behave the way th
 
 The physical remote's color wheel isn't infinitely precise: it has exactly **64 discrete positions** around the full 360°. When you pick a color on Home Assistant's built-in color wheel, the integration converts your pick to the closest one of those 64 real wheel positions and sends that single RF code — you get the same resolution the original remote's wheel offers, no more, no less. The reported color in Home Assistant reflects the position that was actually sent, not your exact pick, so what you see matches what the light is actually doing.
 
-<img width="675" height="754" alt="image" src="https://github.com/user-attachments/assets/34138edb-3fa9-4d2c-9467-11866aaa01aa" />
-
+<details>
+  <summary>Show image</summary>
+  <img width="675" height="754" alt="image" src="https://github.com/user-attachments/assets/34138edb-3fa9-4d2c-9467-11866aaa01aa" />
+</details>
 
 ### Brightness slider → intensity *or* effect speed, depending on mode
 
@@ -84,8 +93,10 @@ Home Assistant's light card always labels its brightness slider "Brightness" —
 
 The physical remote offer 8 selection of speed and brightness. You get exactly the same resolution from the home assistant brightness slider despite the slider being ajustable from 0 to 100%. The actual % selection will be converted to the closest availabe speed / brightness (8 level each at a 12.5% increment)
 
-<img width="663" height="761" alt="image" src="https://github.com/user-attachments/assets/a18bc17e-3d70-4e2e-bb50-eb919ffb7c1b" />
-
+<details>
+  <summary>Show image</summary>
+  <img width="663" height="761" alt="image" src="https://github.com/user-attachments/assets/a18bc17e-3d70-4e2e-bb50-eb919ffb7c1b" />
+</details>
 
 ### White → its own button in the light entity, not a wheel position
 
