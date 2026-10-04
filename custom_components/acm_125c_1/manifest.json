@@ -8,6 +8,5 @@
   "integration_type": "device",
   "iot_class": "assumed_state",
   "issue_tracker": "https://github.com/alray31/ACM-125C-1/issues",
-  "requirements": ["rf-protocols>=2.2.0"],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
