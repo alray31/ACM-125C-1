@@ -43,6 +43,7 @@ from homeassistant.components.light import (
 )
 from homeassistant.const import STATE_ON
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
@@ -140,26 +141,19 @@ class Acm125c1Light(LightEntity, RestoreEntity):
     async def _send(self, command) -> None:
         """Send one RF command through the configured transmitter.
 
-        This integration is "assumed state" (RF is one-way, fire-and-
-        forget): we report whatever we *told* the light to do, not
-        something we can confirm. So if the actual RF transmission call
-        raises, we log it clearly (visible in Settings > System > Logs)
-        instead of letting the exception abort the rest of async_turn_on/
-        async_turn_off - otherwise a single failed send silently prevents
-        `is_on` from ever being updated, which looks exactly like "the
-        button does nothing".
+        RF is one-way, so success only means the transmitter accepted the
+        command. If it can't (e.g. the transmitter is unavailable), raise so
+        Home Assistant shows the error and the assumed state is not updated.
         """
+        transmitter = self._entry.runtime_data.transmitter_entity_id
         try:
-            await radio_frequency.async_send_command(
-                self.hass,
-                self._entry.runtime_data.transmitter_entity_id,
-                command,
-            )
-        except Exception:
-            _LOGGER.exception(
-                "Failed to send RF command via transmitter %s",
-                self._entry.runtime_data.transmitter_entity_id,
-            )
+            await radio_frequency.async_send_command(self.hass, transmitter, command)
+        except HomeAssistantError:
+            raise
+        except Exception as err:
+            raise HomeAssistantError(
+                f"Failed to send RF command via transmitter {transmitter}: {err}"
+            ) from err
 
     async def _ensure_on(self) -> None:
         """Send the base ON code if the light isn't already on."""
